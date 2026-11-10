@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<title>日語影音學習</title>
+<style>
+:root{
+  --bg:#f6f6f4; --surface:#ffffff; --surface2:#efefec; --text:#16181d; --muted:#6b6f78; --dim:#a3a6ad;
+  --line:#e2e2de; --accent:#e5484d; --accent-soft:rgba(229,72,77,.12);
+  --n5:#2f9e44; --n4:#0c8599; --n3:#1c7ed6; --n2:#7048e8; --n1:#e8590c; --n0:#9a9da4;
+  --sheet-shadow:0 -8px 30px rgba(0,0,0,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1115; --surface:#171a20; --surface2:#20242c; --text:#eef0f3; --muted:#9aa0aa; --dim:#5d636e;
+    --line:#262a33; --accent:#ff6369; --accent-soft:rgba(255,99,105,.16);
+    --n5:#51cf66; --n4:#22b8cf; --n3:#4dabf7; --n2:#9775fa; --n1:#ff922b; --n0:#7d828c;
+    --sheet-shadow:0 -8px 30px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","PingFang TC","Noto Sans TC",sans-serif;
+  -webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+[hidden]{display:none!important}
+
+/* ---------- 首頁 ---------- */
+#home{max-width:720px;margin:0 auto;padding:20px 16px 40px}
+#home h1{font-size:22px;margin:8px 0 4px}
+#home p.sub{color:var(--muted);margin:0 0 18px;font-size:14px}
+.card{display:flex;gap:12px;padding:10px;border-radius:12px;background:var(--surface);margin-bottom:10px;text-decoration:none;color:inherit;border:1px solid var(--line)}
+.card img{width:128px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;flex:none;background:var(--surface2)}
+.card b{font-size:14px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card small{color:var(--muted);display:block;margin-top:4px;font-size:12px}
+
+/* ---------- 播放頁 ---------- */
+#view{display:flex;flex-direction:column;height:100dvh;max-width:720px;margin:0 auto;background:var(--bg)}
+.player{position:relative;width:100%;aspect-ratio:16/9;background:#000;flex:none}
+.player iframe,#yt{position:absolute;inset:0;width:100%;height:100%;border:0}
+.bar{display:flex;align-items:center;gap:6px;padding:8px 10px;flex:none;overflow-x:auto;scrollbar-width:none}
+.bar::-webkit-scrollbar{display:none}
+.icon-btn{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface2);flex:none;font-size:18px}
+.seg{display:flex;background:var(--surface2);border-radius:999px;padding:3px;flex:none}
+.seg button{padding:5px 11px;border-radius:999px;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.chip{padding:7px 11px;border-radius:999px;background:var(--surface2);font-size:13px;color:var(--muted);flex:none;white-space:nowrap}
+.chip.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:none}
+.tabs button{flex:1;padding:10px 0 9px;font-size:15px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--text);font-weight:600;border-color:var(--accent)}
+.tabs .count{font-size:12px;color:var(--dim);font-weight:400}
+main{position:relative;flex:1;min-height:0}
+.panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+
+/* 字幕（歌詞式） */
+#subs{padding:16px 18px 45vh}
+.line{padding:10px 12px;margin:2px 0;border-radius:12px;transition:opacity .25s,background .25s;opacity:.42;cursor:pointer}
+.line.past{opacity:.3}
+.line.cur{opacity:1;background:var(--surface)}
+.line.looping{box-shadow:inset 3px 0 0 var(--accent)}
+.line .ja{font-size:19px;line-height:1.9;font-weight:600;letter-spacing:.02em}
+.line .zh{font-size:15px;line-height:1.5;color:var(--muted);margin-top:2px}
+.line.cur .zh{color:var(--text);opacity:.8}
+.mode-ja .zh,.mode-zh .ja{display:none}
+.mode-zh .line .zh{font-size:18px;font-weight:600;color:var(--text)}
+.line .ts{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;font-weight:400}
+rt{font-size:.5em;font-weight:400;color:var(--muted);letter-spacing:0}
+.no-furi rt{display:none}
+.w{border-bottom:2px solid transparent;border-radius:2px;cursor:pointer}
+.line .w.lv5{border-color:color-mix(in srgb,var(--n5) 55%,transparent)}
+.line .w.lv4{border-color:color-mix(in srgb,var(--n4) 55%,transparent)}
+.line .w.lv3{border-color:color-mix(in srgb,var(--n3) 55%,transparent)}
+.line .w.lv2{border-color:color-mix(in srgb,var(--n2) 55%,transparent)}
+.line .w.lv1{border-color:color-mix(in srgb,var(--n1) 55%,transparent)}
+.w:active{background:var(--accent-soft)}
+#follow{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--text);color:var(--bg);
+  padding:9px 16px;border-radius:999px;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:2}
+
+/* 單字 */
+#vocab{padding:0 0 40px}
+.filters{position:sticky;top:0;display:flex;gap:6px;padding:10px 12px;overflow-x:auto;background:var(--bg);z-index:1;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filters .chip span{opacity:.7;font-weight:400;margin-left:3px}
+.vgroup h3{font-size:13px;margin:14px 16px 6px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
+.vitem{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.vitem:active{background:var(--surface2)}
+.vitem .word{font-size:18px;font-weight:600;min-width:0}
+.vitem .rd{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
+.vitem .mean{font-size:14px;color:var(--muted);margin-top:2px}
+.vitem .main{flex:1;min-width:0}
+.vitem .n{font-size:12px;color:var(--dim);flex:none}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;color:#fff;line-height:1.4}
+.b5{background:var(--n5)}.b4{background:var(--n4)}.b3{background:var(--n3)}.b2{background:var(--n2)}.b1{background:var(--n1)}.b0{background:var(--n0)}
+
+/* 單字卡 bottom sheet */
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:10}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;max-height:72dvh;overflow-y:auto;background:var(--surface);
+  border-radius:18px 18px 0 0;box-shadow:var(--sheet-shadow);z-index:11;padding:10px 18px calc(20px + env(safe-area-inset-bottom))}
+#sheet .grab{width:38px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+#sheet .big{font-size:32px;font-weight:700;line-height:1.2}
+#sheet .reading{color:var(--muted);font-size:15px;margin:4px 0 10px}
+#sheet .zhm{font-size:18px;margin:8px 0 4px}
+#sheet .enm{font-size:13px;color:var(--dim)}
+#sheet h4{font-size:13px;color:var(--muted);margin:18px 0 6px;font-weight:600}
+.ex{padding:10px 12px;border-radius:10px;background:var(--surface2);margin-bottom:8px;cursor:pointer}
+.ex .ja{font-size:15px;line-height:1.6}
+.ex .ja mark{background:var(--accent-soft);color:var(--accent);border-radius:3px;padding:0 1px}
+.ex .zh{font-size:13px;color:var(--muted);margin-top:2px}
+.ex .ts{font-size:11px;color:var(--dim)}
+.empty{color:var(--muted);text-align:center;padding:40px 16px}
+</style>
+</head>
+<body>
+
+<div id="home" hidden>
+  <h1>日語影音學習</h1>
+  <p class="sub">選一支影片開始</p>
+  <div id="list"></div>
+</div>
+
+<div id="view" hidden>
+  <div class="player"><div id="yt"></div></div>
+  <div class="bar">
+    <a class="icon-btn" href="./" aria-label="影片列表" style="text-decoration:none;color:inherit">‹</a>
+    <div class="seg" id="mode">
+      <button data-m="ja">日</button><button data-m="both">雙語</button><button data-m="zh">中</button>
+    </div>
+    <button class="chip" id="furiBtn">假名</button>
+    <button class="chip" id="loopBtn">單句重複</button>
+    <button class="chip" id="speedBtn">1x</button>
+  </div>
+  <nav class="tabs">
+    <button data-tab="subs" class="on">字幕</button>
+    <button data-tab="vocab">單字 <span class="count" id="vcount"></span></button>
+  </nav>
+  <main>
+    <div id="subs" class="panel"></div>
+    <div id="vocab" class="panel" hidden>
+      <div class="filters" id="filters"></div>
+      <div id="vlist"></div>
+    </div>
+    <button id="follow" hidden>↓ 回到目前字幕</button>
+  </main>
+</div>
+
+<div id="scrim" hidden></div>
+<div id="sheet" hidden></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = t => { t = Math.floor(t); return Math.floor(t/60) + ":" + String(t%60).padStart(2,"0"); };
+const LV = {5:"N5",4:"N4",3:"N3",2:"N2",1:"N1",0:"未分級"};
+function load(k, d){ try{ const v = localStorage.getItem("jp."+k); return v === null ? d : JSON.parse(v); }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem("jp."+k, JSON.stringify(v)); }catch(e){} }
+
+const S = { data:null, player:null, ready:false, cur:-1, follow:true, loopIdx:-1,
+  mode: load("mode","both"), furi: load("furi", true), loop:false, rate:1, level:"all", tab:"subs" };
+
+const vid = new URLSearchParams(location.search).get("v");
+vid ? openVideo(vid) : showHome();
+
+/* ---------- 首頁 ---------- */
+async function showHome(){
+  $("#home").hidden = false;
+  let list = [];
+  try { list = await (await fetch("videos/index.json", {cache:"no-cache"})).json(); } catch(e){}
+  $("#list").innerHTML = list.length ? list.map(v => `
+    <a class="card" href="?v=${encodeURIComponent(v.id)}">
+      <img src="https://i.ytimg.com/vi/${encodeURIComponent(v.id)}/mqdefault.jpg" alt="" loading="lazy">
+      <div><b>${esc(v.title)}</b><small>${esc(v.channel||"")}</small><small>${v.count} 句・${v.words} 個單字</small></div>
+    </a>`).join("") : `<div class="empty">還沒有影片</div>`;
+}
+
+/* ---------- 播放頁 ---------- */
+async function openVideo(id){
+  $("#view").hidden = false;
+  try {
+    S.data = await (await fetch(`videos/${encodeURIComponent(id)}.json`, {cache:"no-cache"})).json();
+  } catch(e){
+    $("#subs").innerHTML = `<div class="empty">找不到這支影片的資料</div>`; return;
+  }
+  document.title = S.data.title + "｜日語影音學習";
+  // 每個單字出現在哪些句子
+  S.occ = S.data.vocab.map(() => []);
+  S.data.sentences.forEach((s, i) => s.t.forEach(t => { if (t[2] >= 0 && S.occ[t[2]].at(-1) !== i) S.occ[t[2]].push(i); }));
+  renderSubs(); renderFilters(); renderVocab(); applyMode(); applyFuri();
+  $("#vcount").textContent = S.data.vocab.length;
+
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+  window.onYouTubeIframeAPIReady = () => {
+    S.player = new YT.Player("yt", {
+      videoId: id,
+      playerVars: { playsinline:1, rel:0, modestbranding:1, cc_load_policy:0, iv_load_policy:3 },
+      events: { onReady: () => { S.ready = true; } }
+    });
+  };
+  setInterval(tick, 200);
+}
+
+function ruby(surface, reading){
+  if (!reading || reading === surface) return esc(surface);
+  // 去掉前後相同的假名，只在漢字上標讀音（例：頂い/いただい → 頂(いただ)い）
+  let a = 0, b = 0;
+  while (a < surface.length - 1 && surface[a] === reading[a]) a++;
+  while (b < surface.length - a - 1 && surface.at(-1-b) === reading.at(-1-b)) b++;
+  const core = surface.slice(a, surface.length - b), rcore = reading.slice(a, reading.length - b);
+  return esc(surface.slice(0,a)) + `<ruby>${esc(core)}<rt>${esc(rcore)}</rt></ruby>` + esc(surface.slice(surface.length - b));
+}
+
+function jaHTML(s){
+  return s.t.map(([w, r, v]) => {
+    const inner = ruby(w, r);
+    if (v < 0) return inner;
+    return `<span class="w lv${S.data.vocab[v].lv}" data-v="${v}">${inner}</span>`;
+  }).join("");
+}
+
+function renderSubs(){
+  $("#subs").innerHTML = S.data.sentences.map((s, i) => `
+    <div class="line" data-i="${i}">
+      <div class="ja">${jaHTML(s)}</div>
+      <div class="zh">${esc(s.zh)} <span class="ts">${fmt(s.s)}</span></div>
+    </div>`).join("");
+}
+
+$("#subs").addEventListener("click", e => {
+  const w = e.target.closest(".w");
+  if (w) { openWord(+w.dataset.v, true); return; }
+  const line = e.target.closest(".line");
+  if (!line) return;
+  const i = +line.dataset.i;
+  if (S.loop) setLoop(i);
+  S.follow = true; $("#follow").hidden = true;
+  seek(i);
+});
+
+function seek(i){
+  if (!S.ready) return;
+  S.player.seekTo(S.data.sentences[i].s, true);
+  S.player.playVideo();
+  setCur(i);
+}
+
+function findIdx(t){
+  const a = S.data.sentences; let lo = 0, hi = a.length - 1, ans = -1;
+  while (lo <= hi){ const m = (lo + hi) >> 1; if (a[m].s <= t + 0.05){ ans = m; lo = m + 1; } else hi = m - 1; }
+  return ans;
+}
+
+function tick(){
+  if (!S.ready || !S.player.getCurrentTime) return;
+  const t = S.player.getCurrentTime();
+  if (S.loop && S.loopIdx >= 0){
+    const s = S.data.sentences[S.loopIdx];
+    if (t >= s.e || t < s.s - 1) { S.player.seekTo(s.s, true); return; }
+  }
+  const i = findIdx(t);
+  if (i !== S.cur) setCur(i);
+}
+
+function setCur(i){
+  const lines = $("#subs").children;
+  if (S.cur >= 0 && lines[S.cur]) lines[S.cur].classList.remove("cur");
+  for (let k = Math.max(0, Math.min(S.cur, i) - 1); k < lines.length && k <= Math.max(S.cur, i) + 1; k++)
+    lines[k].classList.toggle("past", k < i);
+  if (Math.abs(i - S.cur) > 2) [...lines].forEach((l, k) => l.classList.toggle("past", k < i));
+  S.cur = i;
+  if (i < 0) return;
+  lines[i].classList.add("cur");
+  if (S.follow && S.tab === "subs") scrollToCur(true);
+}
+
+function scrollToCur(smooth){
+  const el = $("#subs").children[S.cur]; if (!el) return;
+  const p = $("#subs");
+  p.scrollTo({ top: el.offsetTop - p.clientHeight * 0.32, behavior: smooth ? "smooth" : "auto" });
+}
+
+// 使用者自己滑動字幕時，暫停自動捲動
+["touchmove","wheel"].forEach(ev => $("#subs").addEventListener(ev, () => {
+  if (S.follow){ S.follow = false; $("#follow").hidden = false; }
+}, {passive:true}));
+$("#follow").onclick = () => { S.follow = true; $("#follow").hidden = true; scrollToCur(true); };
+
+/* ---------- 工具列 ---------- */
+$("#mode").onclick = e => { const m = e.target.dataset.m; if (m){ S.mode = m; save("mode", m); applyMode(); } };
+function applyMode(){
+  [...$("#mode").children].forEach(b => b.classList.toggle("on", b.dataset.m === S.mode));
+  $("#subs").classList.toggle("mode-ja", S.mode === "ja");
+  $("#subs").classList.toggle("mode-zh", S.mode === "zh");
+}
+$("#furiBtn").onclick = () => { S.furi = !S.furi; save("furi", S.furi); applyFuri(); };
+function applyFuri(){ $("#furiBtn").classList.toggle("on", S.furi); document.body.classList.toggle("no-furi", !S.furi); }
+
+$("#loopBtn").onclick = () => { S.loop = !S.loop; setLoop(S.loop ? Math.max(S.cur, 0) : -1); };
+function setLoop(i){
+  const lines = $("#subs").children;
+  if (S.loopIdx >= 0 && lines[S.loopIdx]) lines[S.loopIdx].classList.remove("looping");
+  S.loopIdx = i;
+  if (i >= 0) lines[i].classList.add("looping");
+  $("#loopBtn").classList.toggle("on", S.loop);
+}
+$("#speedBtn").onclick = () => {
+  const rates = [1, 0.75, 0.5]; S.rate = rates[(rates.indexOf(S.rate) + 1) % rates.length];
+  $("#speedBtn").textContent = S.rate + "x"; $("#speedBtn").classList.toggle("on", S.rate !== 1);
+  if (S.ready) S.player.setPlaybackRate(S.rate);
+};
+
+$(".tabs").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  S.tab = b.dataset.tab;
+  [...$(".tabs").children].forEach(x => x.classList.toggle("on", x === b));
+  $("#subs").hidden = S.tab !== "subs"; $("#vocab").hidden = S.tab !== "vocab";
+  $("#follow").hidden = S.tab !== "subs" || S.follow;
+  if (S.tab === "subs" && S.follow) scrollToCur(false);
+};
+
+/* ---------- 單字列表 ---------- */
+function renderFilters(){
+  const cnt = {all: S.data.vocab.length};
+  S.data.vocab.forEach(v => cnt[v.lv] = (cnt[v.lv] || 0) + 1);
+  const keys = ["all", 5, 4, 3, 2, 1, 0].filter(k => cnt[k]);
+  $("#filters").innerHTML = keys.map(k =>
+    `<button class="chip${String(k) === String(S.level) ? " on" : ""}" data-l="${k}">${k === "all" ? "全部" : LV[k]}<span>${cnt[k]}</span></button>`).join("");
+}
+$("#filters").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  S.level = b.dataset.l; renderFilters(); renderVocab(); $("#vocab").scrollTop = 0;
+};
+function renderVocab(){
+  const order = [5, 4, 3, 2, 1, 0];
+  const levels = S.level === "all" ? order : [+S.level];
+  $("#vlist").innerHTML = levels.map(lv => {
+    const items = S.data.vocab.map((v, i) => [v, i]).filter(([v]) => v.lv === lv)
+      .sort((a, b) => b[0].n - a[0].n || a[0].first - b[0].first);
+    if (!items.length) return "";
+    return `<div class="vgroup"><h3><span class="badge b${lv}">${LV[lv]}</span>${items.length} 個</h3>` +
+      items.map(([v, i]) => `
+        <div class="vitem" data-v="${i}">
+          <div class="main">
+            <div class="word">${esc(v.w)}${v.r && v.r !== v.w ? `<span class="rd">${esc(v.r)}</span>` : ""}</div>
+            <div class="mean">${esc(v.zh || v.en || "")}</div>
+          </div>
+          <div class="n">${v.n} 次</div>
+        </div>`).join("") + `</div>`;
+  }).join("");
+}
+$("#vlist").onclick = e => { const it = e.target.closest(".vitem"); if (it) openWord(+it.dataset.v, false); };
+
+/* ---------- 單字卡 ---------- */
+function openWord(v, fromSubs){
+  const w = S.data.vocab[v];
+  if (fromSubs && S.ready && S.player.getPlayerState() === 1) S.player.pauseVideo();
+  const ex = S.occ[v].map(i => {
+    const s = S.data.sentences[i];
+    const ja = s.t.map(([t, , vi]) => vi === v ? `<mark>${esc(t)}</mark>` : esc(t)).join("");
+    return `<div class="ex" data-i="${i}"><div class="ja">${ja}</div><div class="zh">${esc(s.zh)} <span class="ts">▶ ${fmt(s.s)}</span></div></div>`;
+  }).join("");
+  $("#sheet").innerHTML = `
+    <div class="grab"></div>
+    <span class="badge b${w.lv}">${LV[w.lv]}</span>
+    <div class="big" style="margin-top:8px">${esc(w.w)}</div>
+    <div class="reading">${esc(w.r || "")}</div>
+    <div class="zhm">${esc(w.zh || "")}</div>
+    ${w.en ? `<div class="enm">${esc(w.en)}</div>` : ""}
+    <h4>影片中的例句（${S.occ[v].length}）・點一下播放</h4>${ex}`;
+  $("#sheet").hidden = $("#scrim").hidden = false;
+  $("#sheet").scrollTop = 0;
+}
+function closeSheet(){ $("#sheet").hidden = $("#scrim").hidden = true; }
+$("#scrim").onclick = closeSheet;
+$("#sheet").onclick = e => {
+  const ex = e.target.closest(".ex"); if (!ex) return;
+  closeSheet(); S.follow = true; $("#follow").hidden = true; seek(+ex.dataset.i);
+};
+</script>
+</body>
+</html>
