@@ -5,7 +5,7 @@
       work/<id>/stream.json    (原始字幕的詞級時間，用來校正每句的開始時間)
       data/jlpt/n1~n5.csv      (JLPT 單字表)
       data/glossary_zh.tsv     (單字中文意思，所有影片共用)
-輸出: site/videos/<id>.json、更新 site/videos/index.json
+輸出: docs/videos/<id>.json、更新 docs/videos/index.json
       work/<id>/missing_zh.tsv (還沒有中文意思的單字)
 """
 import warnings; warnings.filterwarnings("ignore")
@@ -193,10 +193,10 @@ for i, (t, ja, zh) in enumerate(rows):
     sentences.append({"s": round(t, 2), "e": round(end, 2), "ja": ja, "zh": zh, "t": toks})
 
 out = {"id": vid, "title": title, "channel": channel, "sentences": sentences, "vocab": vocab}
-(ROOT / "site/videos").mkdir(parents=True, exist_ok=True)
-(ROOT / "site/videos" / f"{vid}.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+(ROOT / "docs/videos").mkdir(parents=True, exist_ok=True)
+(ROOT / "docs/videos" / f"{vid}.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
-idx_path = ROOT / "site/videos/index.json"
+idx_path = ROOT / "docs/videos/index.json"
 idx = json.loads(idx_path.read_text(encoding="utf-8")) if idx_path.exists() else []
 idx = [v for v in idx if v["id"] != vid] + [{"id": vid, "title": title, "channel": channel,
                                               "count": len(sentences), "words": len(vocab)}]
